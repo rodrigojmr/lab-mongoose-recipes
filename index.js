@@ -12,7 +12,8 @@ mongoose
   .connect(MONGODB_URI, {
     useCreateIndex: true,
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useFindAndModify: false
   })
   .then(self => {
     console.log(`Connected to the database: "${self.connection.name}"`);
@@ -21,7 +22,31 @@ mongoose
   })
   .then(() => {
     // Run your code here, after you have insured that the connection was made
+    return Recipe.insertMany(data);
+  })
+  .then(recipes => {
+    console.log('Imported the recipes');
+    return recipes.forEach(recipe => {
+      console.log(recipe.title);
+    });
+  })
+  .then(() => {
+    return Recipe.findOneAndUpdate(
+      { title: 'Rigatoni alla Genovese' },
+      { duration: 100 }
+    );
+  })
+  .then(book => {
+    console.log('Updated Rigatoni alla Genovese', book);
+    return Recipe.deleteOne({ title: 'Carrot Cake' });
+  })
+  .then(data => {
+    console.log('Deleted carrot cake!', data);
+    return mongoose.disconnect();
+  })
+  .then(() => {
+    console.log('Diconnected from MongoDB');
   })
   .catch(error => {
-    console.error('Error connecting to the database', error);
+    console.error('Something went wrong with one of the operations', error);
   });
